@@ -5,8 +5,9 @@ import Link from "next/link";
 import RoleGuard, { LogoutLink } from "../../lib/RoleGuard";
 import { supabase } from "../../lib/supabaseClient";
 
-function SchuelerinDashboard() {
-  const [assignments, setAssignments] = useState([]);
+function SchuelerinFaecher() {
+  const [subjects, setSubjects] = useState([]);
+  const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,89 +16,86 @@ function SchuelerinDashboard() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("assignments")
-      .select(
-        `id, due_date, status, is_wiederholung, note_from_pruefer,
-         tasks ( id, type, question, topics ( name, subjects ( name ) ) )`
-      )
-      .eq("status", "offen")
-      .order("is_wiederholung", { ascending: true })
-      .order("due_date", { ascending: true, nullsFirst: false });
+    const { data: subjectsData } = await supabase.from("subjects").select("*").order("sort_order");
+    const subs = subjectsData || [];
+    setSubjects(subs);
 
-    if (!error) setAssignments(data || []);
+    const [{ data: topics }, { data: worksheets }, { data: tasks }, { data: assignments }, { data: mistakes }] =
+      await Promise.all([
+        supabase.from("topics").select("id, subject_id"),
+        supabase.from("worksheets").select("id, topic_id"),
+        supabase.from("tasks").select("id, worksheet_id"),
+        supabase.from("assignments").select("id, worksheet_id, status").eq("status", "offen"),
+        supabase.from("mistake_queue").select("id, task_id, resolved").eq("resolved", false),
+      ]);
+
+    const topicToSubject = new Map((topics || []).map((t) => [t.id, t.subject_id]));
+    const worksheetToTopic = new Map((worksheets || []).map((w) => [w.id, w.topic_id]));
+    const taskToWorksheet = new Map((tasks || []).map((t) => [t.id, t.worksheet_id]));
+
+    const newCounts = {};
+    subs.forEach((s) => (newCounts[s.id] = { offen: 0, wdh: 0 }));
+
+    (assignments || []).forEach((a) => {
+      const topicId = worksheetToTopic.get(a.worksheet_id);
+      const subjectId = topicToSubject.get(topicId);
+      if (newCounts[subjectId]) newCounts[subjectId].offen += 1;
+    });
+
+    (mistakes || []).forEach((m) => {
+      const worksheetId = taskToWorksheet.get(m.task_id);
+      const topicId = worksheetToTopic.get(worksheetId);
+      const subjectId = topicToSubject.get(topicId);
+      if (newCounts[subjectId]) newCounts[subjectId].wdh += 1;
+    });
+
+    setCounts(newCounts);
     setLoading(false);
   }
-
-  const neueAufgaben = assignments.filter((a) => !a.is_wiederholung);
-  const wiederholungen = assignments.filter((a) => a.is_wiederholung);
 
   return (
     <div>
       <nav className="topnav">
-        <span>👋 Hallo!</span>
+        <span>Hallo!</span>
         <LogoutLink />
       </nav>
-      <h1>Deine Aufgaben</h1>
-      <p className="subtitle">Hier siehst du, was gerade zu tun ist.</p>
-
-      {loading && <p>Lade...</p>}
-
-      {!loading && wiederholungen.length > 0 && (
-        <>
-          <h2>🔁 Wiederholen</h2>
-          {wiederholungen.map((a) => (
-            <AssignmentCard key={a.id} assignment={a} />
-          ))}
-        </>
-      )}
-
-      {!loading && (
-        <>
-          <h2>📝 Neue Aufgaben</h2>
-          {neueAufgaben.length === 0 && (
-            <p className="empty-state">Aktuell keine offenen Aufgaben. Gut gemacht!</p>
-          )}
-          {neueAufgaben.map((a) => (
-            <AssignmentCard key={a.id} assignment={a} />
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
-
-function AssignmentCard({ assignment }) {
-  const task = assignment.tasks;
-  const fach = task?.topics?.subjects?.name;
-  const thema = task?.topics?.name;
-
-  return (
-    <Link
-      href={`/schuelerin/aufgabe/${assignment.id}`}
-      className={`card ${assignment.is_wiederholung ? "wiederholung" : ""}`}
-      style={{ display: "block", textDecoration: "none", color: "inherit" }}
-    >
-      <div style={{ fontSize: "0.8rem", color: "#888" }}>
-        {fach} {thema ? `· ${thema}` : ""}
+      <h1>Deine Fächer</h1>
+      <p className="subtitle">Wähle ein Fach aus.</p>
+      <div className="banner">
+        Arbeitsblätter mit dem Hinweis "Allgemein" orientieren sich am typischen
+        Lehrplan, aber noch nicht am genauen Inhalt eures Schulbuchs.
       </div>
-      <div style={{ fontWeight: 600, marginTop: 4 }}>{task?.question}</div>
-      {assignment.note_from_pruefer && (
-        <div className="feedback-box">💬 {assignment.note_from_pruefer}</div>
-      )}
-      {assignment.due_date && (
-        <div style={{ fontSize: "0.8rem", color: "#888", marginTop: 6 }}>
-          Fällig bis {assignment.due_date}
-        </div>
-      )}
-    </Link>
+      {loading && <p>Lade...</p>}
+      {!loading &&
+        subjects.map((s) => {
+          const c = counts[s.id] || { offen: 0, wdh: 0 };
+          return (
+            <Link
+              key={s.id}
+              href={`/schuelerin/fach/${s.id}`}
+              className="card clickable fach-card"
+              style={{ display: "flex", textDecoration: "none", color: "inherit" }}
+            >
+              <div>
+                <strong>{s.name}</strong>
+                <br />
+                <span style={{ fontSize: "0.85rem", color: "#888" }}>
+                  {c.offen} offene(s) Arbeitsblatt/Arbeitsblätter
+                  {c.wdh > 0 ? ` · ${c.wdh} zu wiederholen` : ""}
+                </span>
+              </div>
+              <span>›</span>
+            </Link>
+          );
+        })}
+    </div>
   );
 }
 
 export default function Page() {
   return (
     <RoleGuard requiredRole="schuelerin">
-      <SchuelerinDashboard />
+      <SchuelerinFaecher />
     </RoleGuard>
   );
 }

@@ -192,3 +192,32 @@ nav.topnav a {
   text-align: center;
   padding: 30px 10px;
 }
+
+.fach-card { display: flex; justify-content: space-between; align-items: center; }
+.error-box { background: #fdeceb; color: var(--color-wrong); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.9rem; }
+.hint { font-size: 0.8rem; color: #888; margin-top: -6px; margin-bottom: 10px; }
+.task-block { border: 1px solid #e2e2e0; border-radius: 10px; padding: 14px; margin-bottom: 14px; position: relative; }
+.task-block .remove-task { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--color-wrong); cursor: pointer; font-size: 0.85rem; }
+.math-preview { background: #f4f6f5; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; min-height: 24px; }
+textarea.latex { font-family: ui-monospace, Menlo, monospace; font-size: 0.9rem; }
+
+.doc-header { border-bottom: 2px solid var(--color-primary); padding-bottom: 12px; margin-bottom: 20px; }
+.doc-fach { color: #666; font-size: 0.9rem; }
+.doc-header h1 { font-size: 1.4rem; margin: 4px 0; }
+.doc-desc { margin: 4px 0; }
+.doc-lernziel { color: #555; font-size: 0.9rem; }
+.doc-warning { color: var(--color-wrong); font-weight: bold; }
+.doc-fields { display: flex; justify-content: space-between; margin-top: 14px; font-size: 0.95rem; }
+.doc-task { margin-bottom: 22px; page-break-inside: avoid; }
+.doc-question { margin-bottom: 8px; }
+.doc-options { margin-left: 8px; }
+.doc-option { margin-bottom: 4px; }
+.doc-lines { margin-top: 6px; }
+.doc-line { border-bottom: 1px solid #999; height: 26px; }
+.doc-solution { background: #f0f4f0; padding: 6px 10px; border-radius: 6px; }
+.doc-explanation { color: #555; font-size: 0.9rem; margin-top: 4px; }
+.doc-image { max-width: 100%; border-radius: 6px; }
+.doc-hint { font-size: 0.85rem; color: #666; margin-top: 4px; }
+.print-toolbar button { margin-right: 8px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--color-primary); background: var(--color-primary); color: white; cursor: pointer; font-size: 0.95rem; }
+.print-toolbar button.secondary { background: white; color: var(--color-primary); }
+@media print { .print-toolbar, nav.topnav, .tabbar { display: none !important; } }

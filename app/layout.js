@@ -1,13 +1,14 @@
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 export const metadata = {
-  title: "Lern-App",
+  title: "Lotta's Lern-App",
   description: "Private Lern-App für Aufgaben, Themen und Lernziele",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Lern-App",
+    title: "Lotta's Lern-App",
   },
 };
 
