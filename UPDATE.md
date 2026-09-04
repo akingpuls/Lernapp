@@ -31,6 +31,25 @@ in die Datenbank einfügen** (Supabase SQL Editor). Beides einmalig, ca. 10 Minu
 
 ## Teil 2: Beispielinhalte in die Datenbank einfügen
 
+**Falls du Supabase schon ganz am Anfang eingerichtet hast** (bevor die
+Arbeitsblatt-Struktur eingeführt wurde), fehlt dir wahrscheinlich die Tabelle
+"worksheets". Erkennbar an der Fehlermeldung `relation "worksheets" does not
+exist`. In dem Fall zuerst diesen Zwischenschritt:
+
+0. **Nur falls obiger Fehler auftritt:** SQL Editor → New query → kompletten
+   Inhalt von `supabase/reset.sql` einfügen → Run. Das entfernt die veraltete
+   Struktur (unbedenklich, da noch keine echten Daten drin sind). Danach:
+   New query → kompletten Inhalt von `supabase/schema.sql` NOCHMAL einfügen
+   → Run (baut jetzt alles vollständig neu auf, inkl. `worksheets`-Tabelle).
+   **Wichtig:** Da dabei auch die `profiles`-Tabelle neu angelegt wird, musst
+   du die beiden Zuordnungen (Prüfer/Schülerin zu den jeweiligen Konten)
+   erneut eintragen: Authentication → Users → UUID der beiden Konten
+   kopieren → Table Editor → profiles → je eine Zeile mit `id` (UUID) und
+   `role` ('pruefer' bzw. 'schuelerin') neu anlegen (wie in SETUP.md Schritt 8
+   beschrieben).
+
+Dann normal weiter:
+
 1. Gehe zu deinem Supabase-Projekt (supabase.com → dein Projekt).
 2. Öffne links **SQL Editor → New query**.
 3. Öffne die Datei `supabase/seed_beispiele.sql` aus dem neuen `App`-Ordner,
