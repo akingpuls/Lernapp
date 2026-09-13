@@ -85,17 +85,35 @@ function SchuelerinArbeitsblaetter() {
       <h2>Arbeitsblätter</h2>
       {assignments.length === 0 && <p className="empty-state">Aktuell keine offenen Arbeitsblätter. Gut gemacht!</p>}
       {assignments.map((a) => (
-        <Link
-          key={a.id}
-          href={`/schuelerin/arbeitsblatt/${a.id}`}
-          className="card clickable"
-          style={{ display: "block", textDecoration: "none", color: "inherit" }}
-        >
-          <strong>{a.worksheets?.title}</strong>
-          {a.worksheets?.description && <div style={{ marginTop: 6 }}>{a.worksheets.description}</div>}
-          {a.note_from_pruefer && <div className="feedback-box">Hinweis: {a.note_from_pruefer}</div>}
-          {a.due_date && <div style={{ fontSize: "0.8rem", color: "#888", marginTop: 6 }}>Fällig bis {a.due_date}</div>}
-        </Link>
+        <div key={a.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <Link
+            href={`/schuelerin/arbeitsblatt/${a.id}`}
+            className="clickable"
+            style={{ display: "block", textDecoration: "none", color: "inherit", padding: 16 }}
+          >
+            <strong>{a.worksheets?.title}</strong>
+            {a.worksheets?.description && <div style={{ marginTop: 6 }}>{a.worksheets.description}</div>}
+            {a.note_from_pruefer && <div className="feedback-box">Hinweis: {a.note_from_pruefer}</div>}
+            {a.due_date && <div style={{ fontSize: "0.8rem", color: "#888", marginTop: 6 }}>Fällig bis {a.due_date}</div>}
+          </Link>
+          {a.worksheets?.id && (
+            <Link
+              href={`/schuelerin/karteikarten/${a.worksheets.id}`}
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: "10px 16px",
+                borderTop: "1px solid #eee",
+                color: "var(--color-primary)",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+              }}
+            >
+              🗂️ Erst mit Karteikarten üben
+            </Link>
+          )}
+        </div>
       ))}
     </div>
   );
